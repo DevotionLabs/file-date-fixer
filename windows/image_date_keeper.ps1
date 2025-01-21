@@ -1,9 +1,58 @@
-# Define the directory to process
-$directoryPath = "."
+function Update-FileCreationDate {
+    param (
+        [System.IO.FileInfo]$file,
+        [datetime]$parsedDate
+    )
 
-if (-not (Test-Path $directoryPath)) {
-    Write-Host "The specified directory does not exist!" -ForegroundColor Red
-    exit
+    try {
+        $originalCreationDate = $file.CreationTime
+
+        if ($originalCreationDate.ToString("yyyy-MM-dd") -eq $parsedDate.ToString("yyyy-MM-dd")) {
+            Write-Host "Preserving time from original creation date for $($file.Name)" -ForegroundColor Gray
+            return
+        }
+
+        $file.CreationTime = $parsedDate
+        Write-Host "Updated creation date for $($file.Name) to $parsedDate" -ForegroundColor Green
+    } catch {
+        Write-Host "Failed to set creation date for $($file.Name)" -ForegroundColor Yellow
+    }
+}
+
+function Process-FilesInDirectory {
+    param (
+        [string]$directoryPath
+    )
+
+    # Loop over all items in the directory
+    Get-ChildItem -Path $directoryPath -File | ForEach-Object {
+        Process-File -file $_
+    }
+}
+
+function Process-File {
+    param (
+        [System.IO.FileInfo]$file
+    )
+
+    $fileName = $file.BaseName # Without extension
+
+    $dateString = Get-DateFromFileName -fileName $fileName
+
+    if (-not $dateString) {
+        Write-Host "File $($file.Name) does not match any supported format." -ForegroundColor Yellow
+        return
+    }
+
+    # Parse the date string into a DateTime object
+    $parsedDate = Parse-DateString -dateString $dateString
+
+    if (-not $parsedDate) {
+        Write-Host "Failed to parse date string '$dateString' for file $($file.Name)" -ForegroundColor Yellow
+        return
+    }
+
+    Update-FileCreationDate -file $file -parsedDate $parsedDate
 }
 
 function Get-DateFromFileName {
@@ -41,38 +90,14 @@ function Parse-DateString {
     return $null
 }
 
-# Loop over all items in the directory
-Get-ChildItem -Path $directoryPath -File | ForEach-Object {
-    # Get the file name without extension
-    $fileName = $_.BaseName
+# Main script
 
-    # Extract the date string from the file name
-    $dateString = Get-DateFromFileName -fileName $fileName
+$directoryPath = "." # TODO: Get path from command line arguments
 
-    if (-not $dateString) {
-        Write-Host "File $($_.Name) does not match any supported format." -ForegroundColor Yellow
-        continue
-    }
-
-    # Parse the date string into a DateTime object
-    $parsedDate = Parse-DateString -dateString $dateString
-
-    if (-not $parsedDate) {
-        Write-Host "Failed to parse date string '$dateString' for file $($_.Name)" -ForegroundColor Yellow
-        continue
-    }
-
-    try {
-        $originalCreationDate = $_.CreationTime
-
-        if ($originalCreationDate.ToString("yyyy-MM-dd") -eq $parsedDate.ToString("yyyy-MM-dd")) {
-            Write-Host "Preserving time from original creation date for $($_.Name)" -ForegroundColor Gray
-            continue
-        }
-
-        $_.CreationTime = $parsedDate
-        Write-Host "Updated creation date for $($_.Name) to $parsedDate" -ForegroundColor Green
-    } catch {
-        Write-Host "Failed to set creation date for $($_.Name)" -ForegroundColor Yellow
-    }
+if (-not (Test-Path $directoryPath)) {
+    Write-Host "The specified directory does not exist!" -ForegroundColor Red
+    exit
 }
+
+
+Process-FilesInDirectory -directoryPath $directoryPath
