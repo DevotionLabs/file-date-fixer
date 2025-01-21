@@ -63,7 +63,13 @@ Get-ChildItem -Path $directoryPath -File | ForEach-Object {
     }
 
     try {
-        # Set the creation time of the file
+        $originalCreationDate = $_.CreationTime
+
+        if ($originalCreationDate.ToString("yyyy-MM-dd") -eq $parsedDate.ToString("yyyy-MM-dd")) {
+            Write-Host "Preserving time from original creation date for $($_.Name)" -ForegroundColor Gray
+            continue
+        }
+
         $_.CreationTime = $parsedDate
         Write-Host "Updated creation date for $($_.Name) to $parsedDate" -ForegroundColor Green
     } catch {
