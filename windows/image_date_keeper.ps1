@@ -1,4 +1,3 @@
-
 # Define the directory to process
 $directoryPath = "."
 
@@ -13,14 +12,14 @@ function Get-DateFromFileName {
     )
 
     $patterns = @(
-        "IMG-(\d{8})-",          # Matches IMG-YYYYMMDD-<whatever>
-        "IMG_(\d{8})",          # Matches IMG_YYYYMMDD<whatever>
-        "Screenshot_(\d{4}-\d{2}-\d{2})-" # Matches Screenshot_YYYY-MM-DD-<whatever>
+        "IMG-(\d{8})-", # IMG-YYYYMMDD-<whatever>
+        "IMG_(\d{8})", # IMG_YYYYMMDD<whatever>
+        "Screenshot_(\d{4}-\d{2}-\d{2})-" # Screenshot_YYYY-MM-DD-<whatever>
     )
 
     foreach ($pattern in $patterns) {
         if ($fileName -match $pattern) {
-            return $matches[1]  # Return the matched date string
+            return $matches[1]
         }
     }
 
@@ -32,16 +31,13 @@ function Parse-DateString {
         [string]$dateString
     )
 
-    # Try parsing as "YYYYMMDD"
     if ($dateString -match "^\d{8}$") {
         return [datetime]::ParseExact($dateString, "yyyyMMdd", $null)
-    }
-    # Try parsing as "YYYY-MM-DD"
-    elseif ($dateString -match "^\d{4}-\d{2}-\d{2}$") {
+
+    } elseif ($dateString -match "^\d{4}-\d{2}-\d{2}$") {
         return [datetime]::ParseExact($dateString, "yyyy-MM-dd", $null)
     }
 
-    # Return null if parsing fails
     return $null
 }
 
@@ -59,17 +55,17 @@ Get-ChildItem -Path $directoryPath -File | ForEach-Object {
     }
 
     # Parse the date string into a DateTime object
-    $creationDate = Parse-DateString -dateString $dateString
+    $parsedDate = Parse-DateString -dateString $dateString
 
-    if(-not $creationDate) {
+    if(-not $parsedDate) {
     	Write-Host "Failed to parse date string '$dateString' for file $($_.Name)" -ForegroundColor Yellow
     	continue
     }
 
     try {
         # Set the creation time of the file
-        $_.CreationTime = $creationDate
-        Write-Host "Updated creation date for $($_.Name) to $creationDate" -ForegroundColor Green
+        $_.CreationTime = $parsedDate
+        Write-Host "Updated creation date for $($_.Name) to $parsedDate" -ForegroundColor Green
     } catch {
         Write-Host "Failed to set creation date for $($_.Name)" -ForegroundColor Yellow
     }
