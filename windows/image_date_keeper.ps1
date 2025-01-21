@@ -49,7 +49,7 @@ Get-ChildItem -Path $directoryPath -File | ForEach-Object {
     # Extract the date string from the file name
     $dateString = Get-DateFromFileName -fileName $fileName
 
-    if(-not $dateString) {
+    if (-not $dateString) {
         Write-Host "File $($_.Name) does not match any supported format." -ForegroundColor Yellow
         continue
     }
@@ -57,9 +57,9 @@ Get-ChildItem -Path $directoryPath -File | ForEach-Object {
     # Parse the date string into a DateTime object
     $parsedDate = Parse-DateString -dateString $dateString
 
-    if(-not $parsedDate) {
-    	Write-Host "Failed to parse date string '$dateString' for file $($_.Name)" -ForegroundColor Yellow
-    	continue
+    if (-not $parsedDate) {
+        Write-Host "Failed to parse date string '$dateString' for file $($_.Name)" -ForegroundColor Yellow
+        continue
     }
 
     try {
