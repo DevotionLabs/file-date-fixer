@@ -5,9 +5,14 @@ function Update-FileCreationDate {
     )
 
     try {
-        $originalCreationDate = $file.CreationTime
+        $originalDate = $file.CreationTime
 
-        if ($originalCreationDate.ToString("yyyy-MM-dd") -eq $parsedDate.ToString("yyyy-MM-dd")) {
+        $originalDateStr = $originalDate.ToString("yyyy-MM-dd")
+        $parsedDateStr = $parsedDate.ToString("yyyy-MM-dd")
+
+        Write-Host "Comparing original creation date ($originalDateStr) with parsed date ($parsedDateStr)" -ForegroundColor Gray
+
+        if ($originalDateStr -eq $parsedDateStr) {
             Write-Host "Preserving time from original creation date for $($file.Name)" -ForegroundColor Gray
             return
         }
