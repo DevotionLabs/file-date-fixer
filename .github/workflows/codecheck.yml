@@ -1,0 +1,30 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check:
+    name: Rust Code Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Update to the last Rust stable version
+        run: rustup update stable
+
+      - name: Check formatting
+        run: cargo fmt -- --check
+
+      - name: Run Clippy (Linter)
+        run: cargo clippy -- -D warnings
+
+      - name: Build project
+        run: cargo build
+
+      - name: Run tests
+        run: cargo test
