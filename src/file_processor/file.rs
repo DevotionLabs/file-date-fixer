@@ -1,8 +1,11 @@
 use std::path::Path;
 
-use chrono::{Local, NaiveDate, ParseResult};
+use chrono::NaiveDate;
 
-use super::normalization::{is_normalized_date_pattern_match, normalize_file_name};
+use super::{
+    date::{extract_date_from_normalized_file_name, is_future_date, parse_normalized_date},
+    normalization::{is_normalized_date_pattern_match, normalize_file_name},
+};
 
 use crate::{
     file_metadata::{get_file_creation_date, set_file_creation_date},
@@ -33,14 +36,6 @@ fn process_matched_pattern_file(file_path: &Path, file_name: &str, normalized_fi
     }
 }
 
-fn extract_date_from_normalized_file_name(file_name: &str) -> &str {
-    file_name.split('_').nth(1).unwrap()
-}
-
-fn parse_normalized_date(date_str: &str) -> ParseResult<NaiveDate> {
-    NaiveDate::parse_from_str(date_str, "%Y%m%d")
-}
-
 fn handle_valid_parsed_date(file_path: &Path, file_name: &str, parsed_date: NaiveDate) {
     debug(&format!("Parsed date: {}", parsed_date));
 
@@ -53,10 +48,6 @@ fn handle_valid_parsed_date(file_path: &Path, file_name: &str, parsed_date: Naiv
     }
 
     process_file_dates(file_path, file_name, parsed_date);
-}
-
-fn is_future_date(parsed_date: NaiveDate) -> bool {
-    parsed_date > Local::now().date_naive()
 }
 
 fn process_file_dates(file_path: &Path, file_name: &str, parsed_date: NaiveDate) {
