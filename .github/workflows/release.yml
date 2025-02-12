@@ -1,0 +1,40 @@
+name: Publish release on push to main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: Create release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get current date as version
+        run: echo "VERSION=$(date +'%y.%m.%d')" >> $GITHUB_ENV
+
+      - name: Set up binaries directory
+        run: mkdir -p binaries
+
+      - name: Build binary for Linux
+        run: |
+          cargo build --release --target x86_64-unknown-linux-gnu
+          mv target/release/file_date_fixer binaries/file_date_fixer-linux
+
+      - name: Build binary for Windows
+        run: |
+          cargo build --release --target x86_64-pc-windows-gnu
+          mv target/release/file_date_fixer.exe binaries/file_date_fixer-windows.exe
+
+      - name: Create Github release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "${{ env.VERSION }}"
+          name: "${{ env.VERSION }}"
+          draft: false
+          prerelease: true
+          files: binaries/*
