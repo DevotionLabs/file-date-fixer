@@ -41,7 +41,6 @@ jobs:
         continue-on-error: true
         run: |
           gh release delete "${{ env.VERSION }}" --yes
-          git tag -d "${{ env.VERSION }}"
           git push --delete origin "${{ env.VERSION }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
