@@ -3,9 +3,6 @@ use std::fs;
 use std::io::Error;
 use std::path::Path;
 
-#[cfg(target_os = "windows")]
-use winapi::shared::minwindef::FILETIME;
-
 #[cfg(not(any(target_os = "windows", target_os = "linux")))]
 compile_error!("This program only supports Windows and Linux.");
 
@@ -16,39 +13,29 @@ pub fn get_file_creation_date(path: &Path) -> Option<NaiveDate> {
 }
 
 #[cfg(target_os = "windows")]
-fn system_time_to_filetime(timestamp: i64) -> FILETIME {
-    let windows_epoch = 11644473600i64; // Difference between UNIX and Windows epoch
-    let timestamp_100ns = (timestamp + windows_epoch) * 10_000_000;
-
-    FILETIME {
-        dwLowDateTime: (timestamp_100ns & 0xFFFFFFFF) as u32,
-        dwHighDateTime: (timestamp_100ns >> 32) as u32,
-    }
-}
-
-#[cfg(target_os = "windows")]
 pub fn set_file_creation_date(path: &Path, new_date: NaiveDate) -> Result<(), Error> {
-    use std::fs::OpenOptions;
-    use std::os::windows::io::AsRawHandle;
-    use std::ptr::null_mut;
-    use winapi::um::fileapi::SetFileTime;
-    use winapi::um::winnt::HANDLE;
+    use filetime::FileTime;
+    use filetime_creation::set_file_ctime;
 
-    let new_date_time = new_date.and_hms_opt(0, 0, 0).unwrap();
-    let new_date_unix_timestamp = new_date_time.and_utc().timestamp();
+    let new_date_time = new_date.and_hms_opt(0, 0, 0).ok_or_else(|| {
+        Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "Invalid date. Could not convert date to datetime",
+        )
+    })?;
 
-    let file = OpenOptions::new().write(true).open(path)?;
-    let handle = file.as_raw_handle() as HANDLE;
+    let utc_date_time = new_date_time.and_utc();
+    let unix_timestamp = utc_date_time.timestamp();
+    let nanos = utc_date_time.timestamp_subsec_nanos();
 
-    // TODO: Manage invalid handle value
+    let filetime = FileTime::from_unix_time(unix_timestamp, nanos);
 
-    let creation_time_ft = system_time_to_filetime(new_date_unix_timestamp);
-
-    let success = unsafe { SetFileTime(handle, &creation_time_ft, null_mut(), null_mut()) };
-
-    if success == 0 {
-        return Err(Error::last_os_error());
-    }
+    set_file_ctime(path, filetime).map_err(|e| {
+        Error::new(
+            std::io::ErrorKind::Other,
+            format!("Failed to set file creation time for {:?}: {}", path, e),
+        )
+    })?;
 
     Ok(())
 }
