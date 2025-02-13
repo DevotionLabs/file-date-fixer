@@ -3,7 +3,8 @@ use std::fs;
 use std::io::Error;
 use std::path::Path;
 
-use winapi::shared::minwindef::FILETIME; // TODO: Only for Windows
+#[cfg(target_os = "windows")]
+use winapi::shared::minwindef::FILETIME;
 
 #[cfg(not(any(target_os = "windows", target_os = "linux")))]
 compile_error!("This program only supports Windows and Linux.");
