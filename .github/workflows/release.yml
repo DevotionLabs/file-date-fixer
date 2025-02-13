@@ -53,3 +53,4 @@ jobs:
           draft: false
           prerelease: true
           files: binaries/*
+          generate_release_notes: true
