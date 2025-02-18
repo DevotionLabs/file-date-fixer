@@ -19,7 +19,7 @@ fn main() {
         std::process::exit(1);
     }
 
-    info("Starting file date normalization process");
+    info("Starting file date fix process");
 
     process_dir(dir_path, args.recursive);
 }
