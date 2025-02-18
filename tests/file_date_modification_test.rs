@@ -7,7 +7,7 @@ use tempfile::TempDir;
 use file_date_fixer::file_metadata::linux::get_file_modification_date as get_file_metadata_date;
 
 #[cfg(target_os = "windows")]
-use my_project::file_metadata::windows::get_file_creation_date as get_file_metadata_date;
+use file_date_fixer::file_metadata::windows::get_file_creation_date as get_file_metadata_date;
 
 struct TestFile {
     name: &'static str,
