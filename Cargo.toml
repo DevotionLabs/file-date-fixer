@@ -1,5 +1,5 @@
 [package]
-name = "file-date-fixer"
+name = "file_date_fixer"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,3 +10,14 @@ colored = "3.0.0"
 filetime = "0.2.25"
 filetime_creation = "0.2.0"
 regex = "1.11.1"
+
+[lib]
+name = "file_date_fixer"
+path = "src/lib.rs"
+
+[[bin]]
+name = "file_date_fixer"
+path = "src/main.rs"
+
+[dev-dependencies]
+tempfile = "3.17.1"
