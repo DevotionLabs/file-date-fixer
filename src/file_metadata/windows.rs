@@ -1,5 +1,5 @@
 #[cfg(target_os = "windows")]
-mod windows {
+mod windows_only {
     use chrono::NaiveDate;
     use filetime::FileTime;
     use filetime_creation::set_file_ctime;
@@ -40,4 +40,4 @@ mod windows {
 }
 
 #[cfg(target_os = "windows")]
-pub use windows::*;
+pub use windows_only::*;

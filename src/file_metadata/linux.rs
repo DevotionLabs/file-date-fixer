@@ -1,5 +1,5 @@
 #[cfg(target_os = "linux")]
-mod linux {
+mod linux_only {
     use chrono::NaiveDate;
     use filetime::{set_file_mtime, FileTime};
     use std::fs::Metadata;
@@ -25,4 +25,4 @@ mod linux {
 }
 
 #[cfg(target_os = "linux")]
-pub use linux::*;
+pub use linux_only::*;
