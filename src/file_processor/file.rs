@@ -26,7 +26,7 @@ pub fn process_file(file_path: &Path, file_name: &str) {
 
     debug(&format!("Processing file: {}", file_name));
 
-    if is_normalized_date_pattern_match(file_name) {
+    if is_normalized_date_pattern_match(normalized_file_name.as_str()) {
         process_matched_pattern_file(file_path, file_name, &normalized_file_name);
     }
 }
