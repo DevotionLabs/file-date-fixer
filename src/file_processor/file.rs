@@ -7,9 +7,18 @@ use super::{
     normalization::{is_normalized_date_pattern_match, normalize_file_name},
 };
 
-use crate::{
-    file_metadata::{get_file_creation_date, set_file_creation_date},
-    logger::{debug, error, info, warn},
+use crate::logger::{debug, error, info, warn};
+
+#[cfg(target_os = "linux")]
+use crate::file_metadata::linux::{
+    get_file_modification_date as get_file_metadata_date,
+    set_file_modification_date as set_file_metadata_date,
+};
+
+#[cfg(target_os = "windows")]
+use crate::file_metadata::windows::{
+    get_file_creation_date as get_file_metadata_date,
+    set_file_creation_date as set_file_metadata_date,
 };
 
 pub fn process_file(file_path: &Path, file_name: &str) {
@@ -51,26 +60,23 @@ fn handle_valid_parsed_date(file_path: &Path, file_name: &str, parsed_date: Naiv
 }
 
 fn process_file_dates(file_path: &Path, file_name: &str, parsed_date: NaiveDate) {
-    let file_creation_date = match get_file_creation_date(file_path) {
+    let file_date = match get_file_metadata_date(file_path) {
         Some(date) => date,
         None => {
             warn(&format!(
-                "Unable to obtain file creation date for file: {}",
+                "Unable to obtain file metadata date for file: {}",
                 file_name
             ));
             return;
         }
     };
 
-    debug(&format!(
-        "Obtained file creation date: {}",
-        file_creation_date
-    ));
+    debug(&format!("Obtained file metadata date: {}", file_date));
 
-    if file_creation_date > parsed_date {
+    if file_date > parsed_date {
         debug(&format!(
-            "Updating file {}. Creation date ({}) is newer than filename date ({})",
-            file_name, file_creation_date, parsed_date
+            "Updating file {}. File metadata date ({}) is newer than filename date ({})",
+            file_name, file_date, parsed_date
         ));
 
         update_file_creation_date(file_path, file_name, parsed_date);
@@ -78,7 +84,7 @@ fn process_file_dates(file_path: &Path, file_name: &str, parsed_date: NaiveDate)
 }
 
 fn update_file_creation_date(file_path: &Path, file_name: &str, new_creation_date: NaiveDate) {
-    match set_file_creation_date(file_path, new_creation_date) {
+    match set_file_metadata_date(file_path, new_creation_date) {
         Ok(_) => info(&format!(
             "Successfully updated file creation date for file: {}",
             file_name
