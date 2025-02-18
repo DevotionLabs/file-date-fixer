@@ -8,7 +8,5 @@ chrono = "0.4.39"
 clap = { version = "4.5.28", features = ["derive"] }
 colored = "3.0.0"
 filetime = "0.2.25"
+filetime_creation = "0.2.0"
 regex = "1.11.1"
-
-[target.'cfg(target_os = "windows")'.dependencies]
-winapi = { version = "0.3.9", features = ["fileapi", "minwinbase", "sysinfoapi", "timezoneapi"] }
