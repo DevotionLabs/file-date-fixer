@@ -26,6 +26,11 @@ jobs:
       - name: Build project for Linux
         run: cargo build --target x86_64-unknown-linux-gnu
 
+      - name: Add Windows target
+        run: |
+          sudo apt update && sudo apt install -y mingw-w64
+          rustup target add x86_64-pc-windows-gnu
+
       - name: Build project for Windows
         run: cargo build --target x86_64-pc-windows-gnu
 
