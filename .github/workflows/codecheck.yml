@@ -26,8 +26,11 @@ jobs:
       - name: Build project for Linux
         run: cargo build --target x86_64-unknown-linux-gnu
 
-      - name: Run tests
-        run: cargo test
+      - name: Run unit tests
+        run: cargo test-unit
+
+      - name: Run integration tests
+        run: cargo test-int
   windows:
     name: Rust Code Checks for Windows target
     runs-on: windows-latest
@@ -42,5 +45,8 @@ jobs:
       - name: Build project for Windows
         run: cargo build --target x86_64-pc-windows-gnu
 
-      - name: Run tests
-        run: cargo test
+      - name: Run unit tests
+        run: cargo test-unit
+
+      - name: Run integration tests
+        run: cargo test-int
