@@ -1,5 +1,3 @@
-#![cfg(not(test))]
-
 mod cli;
 mod file_metadata;
 mod file_processor;
